@@ -18,7 +18,7 @@ public class LabWeek8Application {
         SpringApplication.run(LabWeek8Application.class, args);
     }
 
-    // ================= Step 1: Public Relations Contact System =================
+    // Step 1: Public Relations Contacts
     @Bean
     CommandLineRunner step1Runner(ContactRepository contactRepository) {
         return args -> {
@@ -37,7 +37,7 @@ public class LabWeek8Application {
         };
     }
 
-    // ================= Step 2: Nurse Association Division Management =================
+    // Step 2: Nurse Association with Divisions and Members
     @Bean
     CommandLineRunner step2Runner(
             AssociationRepository associationRepository
@@ -46,29 +46,32 @@ public class LabWeek8Application {
             // 1. Create an Association
             Association association = new Association("Nurse Association of Spain");
 
-            // 2. Create 7 Divisions
+            // 2. Create 7 Divisions with 1 Member each
+            List<Division> divisions = new ArrayList<>();
             for (int i = 1; i <= 7; i++) {
-                Division division = new Division("Division " + i, "District " + i, null);
+                Division division = new Division("Division " + i, "District " + i);
 
-                // 3. Create at least 1 Member per Division
                 Member member = new Member(
                         "Member " + i,
                         Status.ACTIVE,
                         LocalDate.now().plusDays(i * 30)
                 );
 
-                // Link member to division
-                division.addMember(member);
+                member.setDivision(division);
+                division.setPresident(member);
+                division.getMembers().add(member);
 
-                // Link division to association
-                association.addDivision(division);
+                division.setAssociation(association);
+                divisions.add(division);
             }
 
-            // 4. Save association (cascades all divisions and members)
+            // Add divisions to association
+            association.setDivisions(divisions);
+
+            // Save association (cascades to divisions and members)
             associationRepository.save(association);
 
             System.out.println("Step 2: Association, Divisions, and Members saved!");
         };
     }
-
 }
